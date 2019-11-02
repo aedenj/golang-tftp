@@ -1,0 +1,14 @@
+version: '3.4'
+
+services:
+  compile:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.build
+    volumes:
+      - $PWD/src:/app
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    entrypoint: sh -c "reflex -c /reflex.conf"
+
