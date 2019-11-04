@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+          {
+                "name": "golang-tftp",
+                "type": "go",
+                "request": "launch",
+                "mode": "remote",
+                "remotePath": "/app",
+                "port": 40000,
+                "host": "localhost",
+                "program": "${workspaceRoot}/src",
+                "showLog": true,
+                "trace": "log",
+                "logOutput": "rpc"
+          }
+    ]
+}
