@@ -5,12 +5,25 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile.build
+    volumes:
+      - $PWD/src:/app
+    working_dir: /app
+    ports:
+      - "0.0.0.0:69:69/udp"
+    expose:
+      - "69/udp"
+    entrypoint: sh -c "reflex -c /reflex-compile.conf"
+
+  debug:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.build
     security_opt:
       - seccomp:unconfined
     volumes:
       - $PWD/src:/app
     working_dir: /app
     ports:
-      - "3000:3000/udp"
+      - "3001:3001/udp"
       - "40000:40000"
-    entrypoint: sh -c "reflex -c /reflex.conf"
+    entrypoint: sh -c "reflex -c /reflex-debug.conf"
