@@ -1,5 +1,6 @@
 version: '3.4'
 
+
 services:
   compile:
     build:
@@ -8,11 +9,22 @@ services:
     volumes:
       - $PWD/src:/app
     working_dir: /app
-    ports:
-      - "0.0.0.0:69:69/udp"
-    expose:
-      - "69/udp"
+    #ports:
+      #- "0.0.0.0:3000:3000/udp"
+    #expose:
+      #- "3000/udp"
+    restart: unless-stopped
     entrypoint: sh -c "reflex -c /reflex-compile.conf"
+
+  tests:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.build
+    volumes:
+      - $PWD/src:/app
+    working_dir: /app
+    restart: unless-stopped
+    entrypoint: sh -c "reflex -c /reflex-test.conf"
 
   debug:
     build:
@@ -26,4 +38,5 @@ services:
     ports:
       - "3001:3001/udp"
       - "40000:40000"
+    restart: unless-stopped
     entrypoint: sh -c "reflex -c /reflex-debug.conf"
