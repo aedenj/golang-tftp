@@ -5,5 +5,9 @@ ENV GO111MODULE=on
 RUN go get github.com/cespare/reflex
 RUN go get github.com/go-delve/delve/cmd/dlv
 
-COPY reflex.conf /
+RUN go get github.com/onsi/ginkgo/ginkgo
+
+COPY reflex-compile.conf /
+COPY reflex-debug.conf /
+COPY reflex-test.conf /
 

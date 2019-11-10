@@ -1,0 +1,6 @@
+package tftp
+
+
+func NewServer() { }
+
+
