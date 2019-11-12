@@ -3,38 +3,22 @@ package main
 import (
   "net"
   "log"
-  "os"
-  "os/signal"
-
+  "reflect"
   "github.com/aedenj/golang-tftp/tftp"
 )
 
 func main() {
-  udpAddress, err := net.ResolveUDPAddr("udp", ":3000")
-  if err != nil {
-    log.Fatal(err)
-  }
+  srv := tftp.NewServer()
 
-  conn, err := net.ListenUDP("udp", udpAddress)
-  if err != nil {
-    log.Fatal(err)
-  }
+  srv.Listen()
+  log.Println("Listening on ", srv.Conn.LocalAddr())
+  defer srv.Conn.Close()
 
-  log.Println("Listening on %v\n", conn.LocalAddr())
-
-  // handle ctrl-c
-  go func() {
-    c := make(chan os.Signal, 1)
-    signal.Notify(c, os.Interrupt)
-    for sig := range c {
-      log.Println("Received %v, exiting", sig)
-      os.Exit(0)
-    }
-  }()
+  srv.SetupInterruptHandler()
 
   buffer := make([]byte, tftp.MaxPacketSize)
   for {
-    n, caddr, err := conn.ReadFromUDP(buffer)
+    n, caddr, err := srv.Conn.ReadFromUDP(buffer)
     if err != nil || n <= 0 {
       log.Fatal(err)
       return
@@ -45,36 +29,64 @@ func main() {
       // We got a bad request packet. We're not sending the ack
       // so the client will try again. This is consistent with the
       // first paragraph of section 2 in RFC 1350
-      log.Println("Bad request packet: %s", err)
+      log.Println("Bad request packet: ", err)
       continue
     }
 
-    go HandleRequest(conn, caddr, req)
+    go HandleRequest(caddr, req)
   }
 }
 
-func HandleRequest(conn *net.UDPConn, caddr *net.UDPAddr, req tftp.Packet) {
+func HandleRequest(caddr *net.UDPAddr, req tftp.Packet) {
+  reqPkt, ok := req.(*tftp.PacketRequest)
+  if !ok {
+    log.Printf("Invalid packet type for new connection!")
+    return
+  }
+
+  switch reqPkt.Op {
+    case tftp.OpWRQ:
+      err := HandleWriteRequest(caddr)
+      if err != nil {
+        log.Println("write request finished, with error:")
+        log.Println(err)
+      }
+    default:
+      log.Println("Invalid Packet Type.")
+  }
+
+}
+
+func HandleWriteRequest(caddr *net.UDPAddr) (error){
+  log.Println("HANDLE WRITE")
+
   waddr, err := net.ResolveUDPAddr("udp", ":0")
   if err != nil {
     log.Println("Failed getting UDP address to write to: ", err)
-    return
+    return err
   }
 
-  conn, err = net.DialUDP("udp", waddr, caddr)
+  conn, err := net.DialUDP("udp", waddr, caddr)
   if err != nil {
     log.Println("Error dialing UDP to client: ", err)
-    return
+    return err
   }
   defer conn.Close()
 
-  ack := &tftp.PacketData{BlockNum: 0}
+  ack := &tftp.PacketData{}
   conn.Write(ack.Serialize())
+  buffer := make([]byte, tftp.MaxPacketSize)
+  for {
+    _, _, err = conn.ReadFromUDP(buffer)
+    if err != nil {
+      log.Println("Failed to read data from udp connection")
+      return err
+    }
+    pkt, _ := tftp.ParsePacket(buffer)
 
-  buf := make([]byte, tftp.MaxPacketSize)
-  _, _, err = conn.ReadFromUDP(buf)
-  if err != nil {
-    log.Println("Failed to read data from udp connection")
-    return
+    log.Println(reflect.TypeOf(pkt).String())
+    conn.Write(ack.Serialize())
   }
-}
 
+  return nil
+}

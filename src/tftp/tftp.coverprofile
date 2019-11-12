@@ -1,5 +1,13 @@
 mode: atomic
-github.com/aedenj/golang-tftp/tftp/server.go:4.19,4.21 0 0
+github.com/aedenj/golang-tftp/tftp/server.go:15.28,17.2 1 0
+github.com/aedenj/golang-tftp/tftp/server.go:19.35,21.17 2 0
+github.com/aedenj/golang-tftp/tftp/server.go:25.3,26.17 2 0
+github.com/aedenj/golang-tftp/tftp/server.go:30.3,31.13 2 0
+github.com/aedenj/golang-tftp/tftp/server.go:21.17,23.4 1 0
+github.com/aedenj/golang-tftp/tftp/server.go:26.17,28.4 1 0
+github.com/aedenj/golang-tftp/tftp/server.go:34.42,36.13 1 0
+github.com/aedenj/golang-tftp/tftp/server.go:36.13,39.24 3 0
+github.com/aedenj/golang-tftp/tftp/server.go:39.24,42.6 2 0
 github.com/aedenj/golang-tftp/tftp/wire.go:37.55,38.52 1 10
 github.com/aedenj/golang-tftp/tftp/wire.go:41.3,41.58 1 10
 github.com/aedenj/golang-tftp/tftp/wire.go:44.3,44.54 1 6
